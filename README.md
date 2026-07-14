@@ -1,8 +1,8 @@
-# Ubuntu noble base images
+# Ubuntu Resolute Raccoon
 
-## Paketo Noble Base Stack
+## Paketo Resolute base images
 
-### What is this stack for?
+### What are these base images for?
 
 Ideal for:
 
@@ -10,44 +10,49 @@ Ideal for:
 - Go apps that require some C libraries
 - Node.js/Python/Ruby/etc. apps **without** many native extensions
 
-### What's in the build and run images of this stack?
+### What's in the build and run images?
 
-This stack's build and run images are based on Ubuntu Noble Numbat.
+The build and the run images are based on Ubuntu Resolute Raccoon.
 
-- To see the **list of all packages installed** in the build or run image for a given release, see the `noble-base-stack-{version}-build-receipt.cyclonedx.json` and `noble-base-stack-{version}-run-receipt.cyclonedx.json` attached to each [release](https://github.com/paketo-buildpacks/noble-base-stack/releases). For a quick overview of the packages you can expect to find, see the [stack descriptor file](stack/stack.toml).
+- To see the **list of all packages installed** in the build or run images for a given release, see the `ubuntu-resolute-{base image type}-{version}-{architecture}-receipt.cyclonedx.json` attached to each [release](https://github.com/paketo-buildpacks/ubuntu-resolute-base-images/releases). For a quick overview of the packages you can expect to find, see the [base images file descriptor](images/resolute-base-images/stack.toml).
 
-## Paketo Noble Tiny Stack
+## Paketo Resolute Tiny run image
 
-### What is this stack for?
+### What is this base image for?
 
 Ideal for:
 
 - most Golang apps
 - Java [GraalVM Native Images](https://www.graalvm.org/docs/reference-manual/native-image/)
 
-### What's in the build and run images of this stack?
+### What's the tiny run image?
 
-This stack's build image is based on Ubuntu Noble Numbat. Its run image does not include a Linux distribution.
+This image is based on Ubuntu Resolute Raccoon. The image does not include a Linux distribution.
 
-- To see the **list of all packages installed** in the build or run image for a given release,
-  see the `noble-tiny-stack-{version}-build-receipt.cyclonedx.json` and `noble-tiny-stack-{version}-run-receipt.cyclonedx.json` attached to each [release](https://github.com/paketo-buildpacks/noble-tiny-stack/releases). For a quick overview of the packages you can expect to find, see the [stack descriptor file](stack/stack.toml).
+- To see the **list of all packages installed** in the run image for a given release, see the `ubuntu-resolute-run-{version}-{architecture}-receipt.cyclonedx.json` attached to each [release](https://github.com/paketo-buildpacks/ubuntu-resolute-base-images/releases). For a quick overview of the packages you can expect to find, see the [tiny images file descriptor](images/resolute-tiny-images/stack.toml).
 
-## Paketo Noble Static Stack
+## Paketo Resolute Static Run Image
 
-Stack for statically-linked binaries for Ubuntu 24.04: Noble Numbat
+Image for statically-linked binaries on Ubuntu 26.04 LTS (Resolute Raccoon).
 
-## What is a stack?
+### What's the static run image?
 
-See Paketo's [stacks documentation](https://paketo.io/docs/concepts/stacks/).
+This image is based on Ubuntu Resolute Raccoon. The image does not include a Linux distribution.
+
+- To see the **list of all packages installed** in the run image for a given release, see the `ubuntu-resolute-run-{version}-{architecture}-receipt.cyclonedx.json` attached to each [release](https://github.com/paketo-buildpacks/ubuntu-resolute-base-images/releases). For a quick overview of the packages you can expect to find, see the [static images file descriptor](images/resolute-static-images/stack.toml).
+
+## What is a base image?
+
+See Cloud Native Buildpacks [base images documentation](https://buildpacks.io/docs/for-platform-operators/concepts/base-images/).
 
 ## How can I contribute?
 
-Contribute changes to this stack via a Pull Request. Depending on the proposed changes, you may need to [submit an RFC](https://github.com/paketo-buildpacks/rfcs) first.
+Contribute changes to the base images via a Pull Request. Depending on the proposed changes, you may need to [submit an RFC](https://github.com/paketo-buildpacks/rfcs) first.
 
-## How do I test the stack locally?
+## How do I test the base images locally?
 
 Run [`scripts/test.sh`](scripts/test.sh).
 
-## How do I generate package receipts
+## How do I generate package receipts?
 
 To generate a package receipt based on existing `build.oci` and `run.oci` archives, use [`scripts/receipts.sh`](scripts/receipts.sh).

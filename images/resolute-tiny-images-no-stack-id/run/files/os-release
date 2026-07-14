@@ -1,0 +1,4 @@
+PRETTY_NAME="Paketo Buildpacks Tiny Resolute"
+HOME_URL="https://github.com/paketo-buildpacks/ubuntu-resolute-base-images"
+SUPPORT_URL="https://github.com/paketo-buildpacks/ubuntu-resolute-base-images/blob/main/README.md"
+BUG_REPORT_URL="https://github.com/paketo-buildpacks/ubuntu-resolute-base-images/issues/new"

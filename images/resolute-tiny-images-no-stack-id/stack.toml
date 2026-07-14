@@ -1,0 +1,63 @@
+homepage = "https://github.com/paketo-buildpacks/ubuntu-resolute-base-images"
+maintainer = "Paketo Buildpacks"
+
+platforms = ["linux/amd64", "linux/arm64"]
+
+[build]
+  dockerfile = "./build.Dockerfile"
+  description = "minimal placeholder build image (only the run image is used)"
+  gid = 1001
+  shell = "/bin/bash"
+  uid = 1001
+
+  [build.args]
+    architecture = "amd64"
+
+  [build.platforms."linux/arm64".args]
+    architecture = "arm64"
+
+[run]
+  description = "distroless-like resolute"
+  dockerfile = "./run/run.Dockerfile"
+  gid = 1001
+  shell = "/sbin/nologin"
+  uid = 1002
+
+  [run.args]
+    architecture = "amd64"
+
+    sources = """
+Types: deb
+URIs: http://archive.ubuntu.com/ubuntu/
+Suites: resolute resolute-updates
+Components: main universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: http://security.ubuntu.com/ubuntu/
+Suites: resolute-security
+Components: main universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+"""
+
+    packages = """\
+    base-files \
+    ca-certificates \
+    libc6 \
+    libssl3t64 \
+    netbase \
+    openssl \
+    tzdata \
+    zlib1g \
+    libstdc++6 \
+    libgcc-s1"""
+
+  [run.platforms."linux/arm64".args]
+    architecture = "arm64"
+
+    sources = """
+Types: deb
+URIs: http://ports.ubuntu.com/ubuntu-ports/
+Suites: resolute resolute-updates resolute-security
+Components: main universe multiverse
+    """

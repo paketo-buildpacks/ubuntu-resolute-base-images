@@ -1,4 +1,4 @@
-module github.com/paketo-buildpacks/noble-base-stack
+module github.com/paketo-buildpacks/ubuntu-resolute-base-images
 
 go 1.26.3
 
