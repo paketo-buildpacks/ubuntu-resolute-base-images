@@ -1,6 +1,6 @@
 module github.com/paketo-buildpacks/ubuntu-resolute-base-images
 
-go 1.26.3
+go 1.26.5
 
 require (
 	github.com/google/go-containerregistry v0.19.1
