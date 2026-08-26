@@ -1,4 +1,5 @@
 FROM ubuntu:resolute
+LABEL org.opencontainers.image.source="https://github.com/paketo-buildpacks/ubuntu-resolute-base-images"
 
 ARG sources
 ARG packages
