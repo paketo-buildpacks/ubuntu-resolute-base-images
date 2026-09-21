@@ -35,6 +35,9 @@ func testBuildpackIntegrationBaseImagesNoStacks(t *testing.T, context spec.G, it
 
 		image     occam.Image
 		container occam.Container
+
+		buildImageID string
+		runImageID   string
 	)
 
 	it.Before(func() {
@@ -58,6 +61,9 @@ func testBuildpackIntegrationBaseImagesNoStacks(t *testing.T, context spec.G, it
 		Expect(err).NotTo(HaveOccurred())
 		builderConfigFilepath = builderConfigFile.Name()
 
+		buildImageID = fmt.Sprintf("%s/resolute-base-build-image-no-stacks-%s", RegistryUrl, uuid.NewString())
+		runImageID = fmt.Sprintf("%s/resolute-base-run-image-no-stacks-%s", RegistryUrl, uuid.NewString())
+
 		_, err = fmt.Fprintf(builderConfigFile, `
 
 [build]
@@ -76,13 +82,13 @@ func testBuildpackIntegrationBaseImagesNoStacks(t *testing.T, context spec.G, it
   arch = "arm64"
   os = "linux"
 `,
-			baseImagesNoStacks.BuildImageID,
-			baseImagesNoStacks.RunImageID,
+			buildImageID,
+			runImageID,
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(archiveToDaemon(baseImagesNoStacks.BuildArchive, baseImagesNoStacks.BuildImageID)).To(Succeed())
-		Expect(archiveToDaemon(baseImagesNoStacks.RunArchive, baseImagesNoStacks.RunImageID)).To(Succeed())
+		Expect(archiveToDaemon(baseImagesNoStacks.BuildArchive, buildImageID)).To(Succeed())
+		Expect(archiveToDaemon(baseImagesNoStacks.RunArchive, runImageID)).To(Succeed())
 
 		builder = fmt.Sprintf("builder-%s", uuid.NewString())
 		logs, err := createBuilder(builderConfigFilepath, builder)
@@ -97,8 +103,8 @@ func testBuildpackIntegrationBaseImagesNoStacks(t *testing.T, context spec.G, it
 		Expect(docker.Image.Remove.Execute(builder)).To(Succeed())
 		Expect(os.RemoveAll(builderConfigFilepath)).To(Succeed())
 
-		Expect(docker.Image.Remove.Execute(baseImagesNoStacks.BuildImageID)).To(Succeed())
-		Expect(docker.Image.Remove.Execute(baseImagesNoStacks.RunImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(buildImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(runImageID)).To(Succeed())
 
 		Expect(os.RemoveAll(source)).To(Succeed())
 	})

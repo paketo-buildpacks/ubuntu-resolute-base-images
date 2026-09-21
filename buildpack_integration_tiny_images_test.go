@@ -33,6 +33,10 @@ func testBuildpackIntegrationTinyImages(t *testing.T, context spec.G, it spec.S)
 
 		image     occam.Image
 		container occam.Container
+
+		buildImageID      string
+		builderRunImageID string
+		runImageID        string
 	)
 
 	it.Before(func() {
@@ -54,6 +58,10 @@ func testBuildpackIntegrationTinyImages(t *testing.T, context spec.G, it spec.S)
 		Expect(err).NotTo(HaveOccurred())
 		builderConfigFilepath = builderConfigFile.Name()
 
+		buildImageID = fmt.Sprintf("%s/resolute-base-build-image-%s", RegistryUrl, uuid.NewString())
+		builderRunImageID = fmt.Sprintf("%s/resolute-base-run-image-%s", RegistryUrl, uuid.NewString())
+		runImageID = fmt.Sprintf("%s/resolute-tiny-run-image-%s", RegistryUrl, uuid.NewString())
+
 		_, err = fmt.Fprintf(builderConfigFile, `
 [build]
   image = "%s:latest"
@@ -71,14 +79,14 @@ func testBuildpackIntegrationTinyImages(t *testing.T, context spec.G, it spec.S)
   arch = "arm64"
   os = "linux"
 `,
-			baseImages.BuildImageID,
-			baseImages.RunImageID,
+			buildImageID,
+			builderRunImageID,
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(archiveToDaemon(baseImages.BuildArchive, baseImages.BuildImageID)).To(Succeed())
-		Expect(archiveToDaemon(baseImages.RunArchive, baseImages.RunImageID)).To(Succeed())
-		Expect(archiveToDaemon(tinyImages.RunArchive, tinyImages.RunImageID)).To(Succeed())
+		Expect(archiveToDaemon(baseImages.BuildArchive, buildImageID)).To(Succeed())
+		Expect(archiveToDaemon(baseImages.RunArchive, builderRunImageID)).To(Succeed())
+		Expect(archiveToDaemon(tinyImages.RunArchive, runImageID)).To(Succeed())
 
 		builder = fmt.Sprintf("builder-%s", uuid.NewString())
 		logs, err := createBuilder(builderConfigFilepath, builder)
@@ -93,7 +101,9 @@ func testBuildpackIntegrationTinyImages(t *testing.T, context spec.G, it spec.S)
 		Expect(docker.Image.Remove.Execute(builder)).To(Succeed())
 		Expect(os.RemoveAll(builderConfigFilepath)).To(Succeed())
 
-		Expect(docker.Image.Remove.Execute(tinyImages.RunImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(buildImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(builderRunImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(runImageID)).To(Succeed())
 
 		Expect(os.RemoveAll(source)).To(Succeed())
 	})
@@ -110,12 +120,12 @@ func testBuildpackIntegrationTinyImages(t *testing.T, context spec.G, it spec.S)
 				"BP_LOG_LEVEL": "DEBUG",
 			}).
 			WithPullPolicy("if-not-present").
-			WithRunImage(tinyImages.RunImageID).
+			WithRunImage(runImageID).
 			WithBuilder(builder).
 			Execute(name, source)
 		Expect(err).ToNot(HaveOccurred(), logs.String)
 
-		Expect(logs.String()).To(ContainSubstring("Using provided run-image '%s'", tinyImages.RunImageID))
+		Expect(logs.String()).To(ContainSubstring("Using provided run-image '%s'", runImageID))
 
 		container, err = docker.Container.Run.
 			WithDirect().

@@ -33,6 +33,10 @@ func testBuildpackIntegrationStaticImages(t *testing.T, context spec.G, it spec.
 
 		image     occam.Image
 		container occam.Container
+
+		buildImageID      string
+		builderRunImageID string
+		runImageID        string
 	)
 
 	it.Before(func() {
@@ -54,6 +58,10 @@ func testBuildpackIntegrationStaticImages(t *testing.T, context spec.G, it spec.
 		Expect(err).NotTo(HaveOccurred())
 		builderConfigFilepath = builderConfigFile.Name()
 
+		buildImageID = fmt.Sprintf("%s/resolute-base-build-image-%s", RegistryUrl, uuid.NewString())
+		builderRunImageID = fmt.Sprintf("%s/resolute-base-run-image-%s", RegistryUrl, uuid.NewString())
+		runImageID = fmt.Sprintf("%s/resolute-static-run-image-%s", RegistryUrl, uuid.NewString())
+
 		_, err = fmt.Fprintf(builderConfigFile, `
 [build]
   image = "%s:latest"
@@ -71,14 +79,14 @@ func testBuildpackIntegrationStaticImages(t *testing.T, context spec.G, it spec.
   arch = "arm64"
   os = "linux"
 `,
-			baseImages.BuildImageID,
-			baseImages.RunImageID,
+			buildImageID,
+			builderRunImageID,
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(archiveToDaemon(baseImages.BuildArchive, baseImages.BuildImageID)).To(Succeed())
-		Expect(archiveToDaemon(baseImages.RunArchive, baseImages.RunImageID)).To(Succeed())
-		Expect(archiveToDaemon(staticImages.RunArchive, staticImages.RunImageID)).To(Succeed())
+		Expect(archiveToDaemon(baseImages.BuildArchive, buildImageID)).To(Succeed())
+		Expect(archiveToDaemon(baseImages.RunArchive, builderRunImageID)).To(Succeed())
+		Expect(archiveToDaemon(staticImages.RunArchive, runImageID)).To(Succeed())
 
 		builder = fmt.Sprintf("builder-%s", uuid.NewString())
 		logs, err := createBuilder(builderConfigFilepath, builder)
@@ -93,7 +101,9 @@ func testBuildpackIntegrationStaticImages(t *testing.T, context spec.G, it spec.
 		Expect(docker.Image.Remove.Execute(builder)).To(Succeed())
 		Expect(os.RemoveAll(builderConfigFilepath)).To(Succeed())
 
-		Expect(docker.Image.Remove.Execute(staticImages.RunImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(buildImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(builderRunImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(runImageID)).To(Succeed())
 
 		Expect(os.RemoveAll(source)).To(Succeed())
 	})
@@ -112,12 +122,12 @@ func testBuildpackIntegrationStaticImages(t *testing.T, context spec.G, it spec.
 				"BP_GO_BUILD_FLAGS": "-buildmode=default",
 			}).
 			WithPullPolicy("if-not-present").
-			WithRunImage(staticImages.RunImageID).
+			WithRunImage(runImageID).
 			WithBuilder(builder).
 			Execute(name, source)
 		Expect(err).ToNot(HaveOccurred(), logs.String)
 
-		Expect(logs.String()).To(ContainSubstring("Using provided run-image '%s'", staticImages.RunImageID))
+		Expect(logs.String()).To(ContainSubstring("Using provided run-image '%s'", runImageID))
 
 		container, err = docker.Container.Run.
 			WithEnv(map[string]string{"PORT": "8080"}).
