@@ -35,6 +35,9 @@ func testBuildpackIntegrationBaseImages(t *testing.T, context spec.G, it spec.S)
 
 		image     occam.Image
 		container occam.Container
+
+		buildImageID string
+		runImageID   string
 	)
 
 	it.Before(func() {
@@ -58,6 +61,9 @@ func testBuildpackIntegrationBaseImages(t *testing.T, context spec.G, it spec.S)
 		Expect(err).NotTo(HaveOccurred())
 		builderConfigFilepath = builderConfigFile.Name()
 
+		buildImageID = fmt.Sprintf("%s/resolute-base-build-image-%s", RegistryUrl, uuid.NewString())
+		runImageID = fmt.Sprintf("%s/resolute-base-run-image-%s", RegistryUrl, uuid.NewString())
+
 		_, err = fmt.Fprintf(builderConfigFile, `
 
 [build]
@@ -76,13 +82,13 @@ func testBuildpackIntegrationBaseImages(t *testing.T, context spec.G, it spec.S)
   arch = "arm64"
   os = "linux"
 `,
-			baseImages.BuildImageID,
-			baseImages.RunImageID,
+			buildImageID,
+			runImageID,
 		)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(archiveToDaemon(baseImages.BuildArchive, baseImages.BuildImageID)).To(Succeed())
-		Expect(archiveToDaemon(baseImages.RunArchive, baseImages.RunImageID)).To(Succeed())
+		Expect(archiveToDaemon(baseImages.BuildArchive, buildImageID)).To(Succeed())
+		Expect(archiveToDaemon(baseImages.RunArchive, runImageID)).To(Succeed())
 
 		builder = fmt.Sprintf("builder-%s", uuid.NewString())
 		logs, err := createBuilder(builderConfigFilepath, builder)
@@ -97,8 +103,8 @@ func testBuildpackIntegrationBaseImages(t *testing.T, context spec.G, it spec.S)
 		Expect(docker.Image.Remove.Execute(builder)).To(Succeed())
 		Expect(os.RemoveAll(builderConfigFilepath)).To(Succeed())
 
-		Expect(docker.Image.Remove.Execute(baseImages.BuildImageID)).To(Succeed())
-		Expect(docker.Image.Remove.Execute(baseImages.RunImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(buildImageID)).To(Succeed())
+		Expect(docker.Image.Remove.Execute(runImageID)).To(Succeed())
 
 		Expect(os.RemoveAll(source)).To(Succeed())
 	})
